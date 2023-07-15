@@ -1,0 +1,188 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[13]:
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+
+
+# In[14]:
+
+
+df1 = pd.read_csv('1_ev_charger_dataset.csv')
+df1.head()
+
+
+# In[15]:
+
+
+print('DF1 Shape: ', df1.shape)
+
+
+# In[16]:
+
+
+print(' <<< DATASET 1 -----------------------------------------------------------')
+print(df1.info())
+
+
+# In[17]:
+
+
+d1 = df1.describe()
+display('<<< DATASET 1 >>>', d1,)
+
+
+# In[18]:
+
+
+plt.figure(figsize=(6, 6))
+sns.barplot(data=df1, y=df1['Region'].sort_values(ascending=True), x='2W', palette='viridis')
+plt.ylabel('State', fontsize=14, family='serif')
+plt.xlabel('Number of EV: 2 Wheelers', family='serif', fontsize=14, labelpad=10)
+plt.xticks(family='serif')
+plt.yticks(family='serif')
+plt.title(label='Statewise Electric Vehicles (2 Wheelers) in India', weight=200, family='serif', size=15, pad=12)
+plt.show()
+
+
+# In[19]:
+
+
+plt.figure(figsize=(6, 6))
+sns.barplot(data=df1, y=df1['Region'].sort_values(ascending=True), x='3W', palette='viridis')
+plt.ylabel('State', fontsize=14, family='serif')
+plt.xlabel('Number of EV: 3 Wheelers', family='serif', fontsize=14, labelpad=10)
+plt.xticks(family='serif')
+plt.yticks(family='serif')
+plt.title(label='Statewise Electric Vehicles (3 Wheelers) in India', weight=200, family='serif', size=15, pad=12)
+plt.show()
+
+
+# In[20]:
+
+
+plt.figure(figsize=(6, 6))
+sns.barplot(data=df1, y=df1['Region'].sort_values(ascending=True), x='4W', palette='viridis')
+plt.ylabel('State', fontsize=14, family='serif')
+plt.xlabel('Number of EV: 4 Wheelers', family='serif', fontsize=14, labelpad=10)
+plt.xticks(family='serif')
+plt.yticks(family='serif')
+plt.title(label='Statewise Electric Vehicles (4 Wheelers) in India', weight=200, family='serif', size=15, pad=12)
+plt.show()
+
+
+# In[21]:
+
+
+plt.figure(figsize=(6, 6))
+sns.barplot(data=df1, y=df1['Region'].sort_values(ascending=True), x='Chargers', palette='viridis')
+plt.ylabel('State', fontsize=14, family='serif')
+plt.xlabel('Number of Charging Stations', family='serif', fontsize=14, labelpad=10)
+plt.xticks(family='serif')
+plt.yticks(family='serif')
+plt.title(label='Number of Charging Stations Sanctioned in India', weight=200, family='serif', size=15, pad=12)
+plt.show()
+     
+
+
+# In[23]:
+
+
+plt.figure(figsize=(6,6))
+sns.heatmap(data=df1.corr(), annot=True, cmap='Purples', cbar=False, square=True, fmt='.2f', linewidths=.3)
+plt.title('Correlation Matrix', family='serif', size=15, pad=12);
+
+
+# In[27]:
+
+
+X = df1[['Region','2W','3W','4W', 'Bus', 'Chargers']]
+
+
+# In[30]:
+
+
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+data=X
+label_encoder = LabelEncoder()
+data['Region'] = label_encoder.fit_transform(data['Region'])
+data['2W'] = label_encoder.fit_transform(data['2W'])
+data['3W'] = label_encoder.fit_transform(data['3W'])
+data['4W'] = label_encoder.fit_transform(data['4W'])
+data['Bus'] = label_encoder.fit_transform(data['Bus'])
+data['Chargers'] = label_encoder.fit_transform(data['Chargers'])
+
+
+# Scale numerical variables
+scaler = StandardScaler()
+data_scaled = scaler.fit_transform(data)
+
+# Convert back to DataFrame
+data_scaled = pd.DataFrame(data_scaled, columns=data.columns)
+
+
+# In[32]:
+
+
+kmean = KMeans(n_clusters=4, init='k-means++', random_state=90)
+kmean.fit(data)
+
+
+# In[33]:
+
+
+print(kmean.labels_)
+
+
+# In[34]:
+
+
+pd.Series(kmean.labels_).value_counts()
+
+
+# In[35]:
+
+
+df1['clusters'] = kmean.labels_
+
+
+# In[47]:
+
+
+from sklearn.model_selection import train_test_split
+data = data.dropna()  
+x=data['2W']
+y=data['Chargers']
+X_train, X_test, y_train, y_test = train_test_split(x,y, test_size=0.2, random_state=42)
+
+
+# In[51]:
+
+
+from sklearn.cluster import KMeans
+kmeans_model = KMeans(n_clusters=4)
+kmeans_model.fit(data)
+kmeans_labels = kmeans_model.predict(data)
+
+
+# In[52]:
+
+
+plt.scatter(data['2W'], data['Chargers'], c=kmeans_labels, cmap='viridis')
+plt.title('K-means Algorithm Clustering')
+plt.show()
+
+
+# In[ ]:
+
+
+
+
